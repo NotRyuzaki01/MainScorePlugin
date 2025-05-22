@@ -1,0 +1,38 @@
+name: MainScorePlugin
+version: '1.0'
+main: me.not_ryuzaki.mainScorePlugin.MainScorePlugin
+api-version: '1.21'
+softdepend: [Vault]
+depend: [BetterTeams]
+description: This is a simnple ScoreBoard plugin that tracks online players, kills, deaths as well as currency. Relying on vault.
+commands:
+  pay:
+    description: Pay another player money
+    usage: /pay <player> <amount>
+
+  shardshop:
+    description: Open the shard shop GUI
+    usage: /shardshop
+
+  giveshards:
+    description: Give shards to a player
+    usage: /giveshards <player> <amount>
+
+  removeshards:
+    description: Remove shards from a player
+    usage: /removeshards <player> <amount>
+
+  shards:
+    description: Check your current shard balance
+    usage: /shards
+
+  settings:
+    description: Change settings
+    usage: /settings
+
+  discord:
+    description: Link to discord server
+    usage: /discord
+
+  media:
+    description: Opens the Media Rank GUI
