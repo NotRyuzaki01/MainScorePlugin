@@ -17,10 +17,25 @@ public class Combat {
     private static final long COMBAT_DURATION = 20 * 1000; // 20 seconds in milliseconds
     static final Set<UUID> combatLoggedPlayers = new HashSet<>();
     private static final Map<UUID, UUID> lastOpponent = new HashMap<>();
+    private static final Map<UUID, Runnable> teleportCancelCallbacks = new HashMap<>();
 
+    public static void registerTeleportCancelCallback(UUID playerId, Runnable onCancel) {
+        teleportCancelCallbacks.put(playerId, onCancel);
+    }
+
+    public static void unregisterTeleportCallback(UUID playerId) {
+        teleportCancelCallbacks.remove(playerId);
+    }
+
+    public static void triggerCombat(Player player) {
+        // Cancel teleport if active
+        Runnable callback = teleportCancelCallbacks.remove(player.getUniqueId());
+        if (callback != null) callback.run();
+    }
 
     public static void startCombat(Player attacker, Player defender) {
-        // Add both players to combat
+        triggerCombat(attacker);
+        triggerCombat(defender);
         enterCombat(attacker, defender);
         enterCombat(defender, attacker);
     }

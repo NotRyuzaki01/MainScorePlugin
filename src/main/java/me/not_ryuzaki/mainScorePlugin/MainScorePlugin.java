@@ -74,6 +74,14 @@ public final class MainScorePlugin extends JavaPlugin implements Listener {
             getServer().getPluginManager().disablePlugin(this);
             return;
         }
+
+        // LuckPerms check (optional but recommended for early validation)
+        if (getServer().getPluginManager().getPlugin("LuckPerms") == null) {
+            getLogger().severe("LuckPerms is required for chat formatting.");
+            getServer().getPluginManager().disablePlugin(this);
+            return;
+        }
+
         kills = new HashMap<>();
         deaths = new HashMap<>();
         shards = new HashMap<>();
@@ -82,25 +90,31 @@ public final class MainScorePlugin extends JavaPlugin implements Listener {
         dailyKills = new HashMap<>();
         scoreboardEnabled = new HashMap<>();
 
+        // Register events and commands
         getServer().getPluginManager().registerEvents(new ChatHoverStats(this), this);
         getServer().getPluginManager().registerEvents(new CombatListener(), this);
         getCommand("media").setExecutor(new MediaCommand());
         getServer().getPluginManager().registerEvents(new MediaCommand(), this);
-        saveDefaultConfig();
-        instance = this;
+
         PayCommand payCommand = new PayCommand(econ, this);
         getCommand("pay").setExecutor(payCommand);
         getCommand("pay").setTabCompleter(payCommand);
+
         getCommand("shardshop").setExecutor(new SpawnerShopCommand(this));
         getCommand("giveshards").setExecutor(new ShardAdminCommand(this));
         getCommand("removeshards").setExecutor(new ShardAdminCommand(this));
         getCommand("shards").setExecutor(new ShardAdminCommand(this));
         getCommand("settings").setExecutor(new SettingsCommand(this));
         getCommand("discord").setExecutor(new DiscordCommand());
+
         getServer().getPluginManager().registerEvents(new JoinListener(this), this);
+
         SettingsCommand settingsCommand = new SettingsCommand(this);
         getCommand("settings").setExecutor(settingsCommand);
         getServer().getPluginManager().registerEvents(settingsCommand, this);
+
+        saveDefaultConfig();
+        instance = this;
 
         // Load disabled pay settings
         ConfigurationSection section = getConfig().getConfigurationSection("pay-enabled");
@@ -112,9 +126,11 @@ public final class MainScorePlugin extends JavaPlugin implements Listener {
                 }
             }
         }
+
         loadStats();
         getServer().getPluginManager().registerEvents(this, this);
 
+        // Scoreboard auto update task
         Bukkit.getScheduler().runTaskTimer(this, () -> {
             for (Player player : Bukkit.getOnlinePlayers()) {
                 FastBoard board = boards.get(player.getUniqueId());
@@ -124,6 +140,7 @@ public final class MainScorePlugin extends JavaPlugin implements Listener {
             }
         }, 20L, 20L);
 
+        // Shard giving task
         Bukkit.getScheduler().runTaskTimer(this, () -> {
             for (Player player : Bukkit.getOnlinePlayers()) {
                 UUID uuid = player.getUniqueId();
@@ -140,6 +157,7 @@ public final class MainScorePlugin extends JavaPlugin implements Listener {
 
         getLogger().info("\u2705 MainUtilPluginScore loaded successfully!");
     }
+
 
     private boolean setupEconomy() {
         if (getServer().getPluginManager().getPlugin("Vault") == null) {
