@@ -1,6 +1,7 @@
 package me.not_ryuzaki.mainScorePlugin;
 
 import fr.mrmicky.fastboard.FastBoard;
+import net.luckperms.api.LuckPerms;
 import net.md_5.bungee.api.ChatMessageType;
 import net.md_5.bungee.api.chat.TextComponent;
 import net.milkbowl.vault.economy.Economy;
@@ -29,8 +30,9 @@ public final class MainScorePlugin extends JavaPlugin implements Listener {
     private Map<UUID, FastBoard> boards = new HashMap<>();
     private Set<UUID> payDisabled = new HashSet<>();
     private Map<UUID, Map<UUID, Long>> dailyKills = new HashMap<>(); // Killer UUID -> (Victim UUID -> Timestamp)
-
+    private final HashSet<UUID> hiddenPlayers = new HashSet<>();
     private Map<UUID, Boolean> scoreboardEnabled = new HashMap<>();
+    private LuckPerms luckPerms;
 
     public void setScoreboardEnabled(UUID uuid, boolean enabled) {
         scoreboardEnabled.put(uuid, enabled);
@@ -89,6 +91,10 @@ public final class MainScorePlugin extends JavaPlugin implements Listener {
         payDisabled = new HashSet<>();
         dailyKills = new HashMap<>();
         scoreboardEnabled = new HashMap<>();
+
+        this.luckPerms = getServer().getServicesManager().load(LuckPerms.class);
+        getServer().getPluginManager().registerEvents(new PlayerJoinListener(this), this);
+        getCommand("hide").setExecutor(new HideCommand(this, luckPerms));
 
         // Register events and commands
         getServer().getPluginManager().registerEvents(new ChatHoverStats(this), this);
@@ -447,5 +453,13 @@ public final class MainScorePlugin extends JavaPlugin implements Listener {
 
     public static MainScorePlugin getInstance() {
         return instance;
+    }
+
+    public HashSet<UUID> getHiddenPlayers() {
+        return hiddenPlayers;
+    }
+
+    public LuckPerms getLuckPerms() {
+        return luckPerms;
     }
 }

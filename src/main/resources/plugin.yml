@@ -2,7 +2,7 @@ name: MainScorePlugin
 version: '1.0'
 main: me.not_ryuzaki.mainScorePlugin.MainScorePlugin
 api-version: '1.21'
-softdepend: [Vault]
+softdepend: [Vault, TAB]
 depend: [BetterTeams]
 description: This is a simnple ScoreBoard plugin that tracks online players, kills, deaths as well as currency. Relying on vault.
 commands:
@@ -36,3 +36,8 @@ commands:
 
   media:
     description: Opens the Media Rank GUI
+
+  hide:
+    description: Toggle scrambled name tag
+    usage: /hide
+    permission: mainscoreplugin.hide

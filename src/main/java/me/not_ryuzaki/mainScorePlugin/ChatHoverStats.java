@@ -13,7 +13,6 @@ import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
 import org.bukkit.event.player.AsyncPlayerChatEvent;
-import org.geysermc.floodgate.api.FloodgateApi;
 
 public class ChatHoverStats implements Listener {
 
@@ -26,16 +25,9 @@ public class ChatHoverStats implements Listener {
     @EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
     public void onChat(AsyncPlayerChatEvent event) {
         Player sender = event.getPlayer();
-
-        // Detect Bedrock player and fall back to normal chat
-        if (FloodgateApi.getInstance().isFloodgatePlayer(sender.getUniqueId())) {
-            return; // Let default chat handle Bedrock players
-        }
-
-        String filteredMessage = event.getMessage(); // Already filtered
+        String filteredMessage = event.getMessage();
 
         Bukkit.getScheduler().runTask(plugin, () -> {
-            // Hover stats
             double money = plugin.getEconomy().getBalance(sender);
             int kills = plugin.getKills().getOrDefault(sender.getUniqueId(), 0);
             int deaths = plugin.getDeaths().getOrDefault(sender.getUniqueId(), 0);
@@ -54,7 +46,6 @@ public class ChatHoverStats implements Listener {
                             "§6☠ §fDeaths §6" + deaths + "\n" +
                             "§e⌚ §fPlaytime §e" + playtimeDays + "d " + playtimeRemainingHours + "h";
 
-            // Get group
             LuckPerms luckPerms = plugin.getServer().getServicesManager().load(LuckPerms.class);
             User user = luckPerms.getUserManager().getUser(sender.getUniqueId());
             String group = "default";
@@ -63,22 +54,25 @@ public class ChatHoverStats implements Listener {
                 group = user.getPrimaryGroup();
             }
 
-            // Define prefix + color
             String rawPrefix = "";
-            String prefixColor = "#AAAAAA"; // default gray
+            String prefixColor = "#AAAAAA";
 
             switch (group.toLowerCase()) {
                 case "owner":
                     rawPrefix = "OWNER ";
                     prefixColor = "#0094FF";
                     break;
+                case "admin":
+                    rawPrefix = "ADMIN ";
+                    prefixColor = ChatColor.RED.getName();
+                    break;
                 case "media":
                     rawPrefix = "📹";
                     prefixColor = "#FF00AA";
                     break;
-                case "admin":
-                    rawPrefix = "ADMIN ";
-                    prefixColor = ChatColor.RED.getName(); // §c
+                case "plus":
+                    rawPrefix = "+";
+                    prefixColor = "#0094FF";
                     break;
                 case "default":
                     rawPrefix = "";
@@ -86,20 +80,17 @@ public class ChatHoverStats implements Listener {
                     break;
             }
 
-            // Build name component
             TextComponent nameComponent = new TextComponent();
 
-            // Add prefix
             if (!rawPrefix.isEmpty()) {
                 TextComponent prefixComponent = new TextComponent(rawPrefix);
                 prefixComponent.setColor(ChatColor.of(prefixColor));
-                if (!group.equalsIgnoreCase("media")) {
-                    prefixComponent.setBold(true);
+                if (group.equalsIgnoreCase("owner") || group.equalsIgnoreCase("admin")) {
+                    prefixComponent.setBold(true); // ONLY bold for owner/admin
                 }
                 nameComponent.addExtra(prefixComponent);
             }
 
-            // Add username
             TextComponent playerNameComponent = new TextComponent(sender.getName());
             if (group.equalsIgnoreCase("owner") || group.equalsIgnoreCase("admin")) {
                 playerNameComponent.setColor(ChatColor.of(prefixColor));
@@ -108,13 +99,15 @@ public class ChatHoverStats implements Listener {
             }
             nameComponent.addExtra(playerNameComponent);
 
-            // Add hover
             nameComponent.setHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, new Text(hoverText)));
 
-            // Add message
-            TextComponent messageComponent = new TextComponent(ChatColor.GRAY + ": " + filteredMessage);
+            TextComponent messageComponent = new TextComponent(": " + filteredMessage);
+            if (group.equalsIgnoreCase("owner") || group.equalsIgnoreCase("admin")) {
+                messageComponent.setColor(ChatColor.of(prefixColor));
+            } else {
+                messageComponent.setColor(ChatColor.of("#BBBBBB")); // brighter gray
+            }
 
-            // Final message
             TextComponent fullMessage = new TextComponent();
             fullMessage.addExtra(nameComponent);
             fullMessage.addExtra(messageComponent);
@@ -124,7 +117,6 @@ public class ChatHoverStats implements Listener {
             }
         });
 
-        // Cancel original message
         event.setCancelled(true);
     }
 }

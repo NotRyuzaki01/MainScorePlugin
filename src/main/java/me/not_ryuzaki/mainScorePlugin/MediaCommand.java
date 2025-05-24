@@ -52,6 +52,7 @@ public class MediaCommand implements CommandExecutor, Listener {
             lore.add(ChatColor.of("#FF00AA") + "Reminders:");
             lore.add(ChatColor.WHITE + "- Must have the IP on screen");
             lore.add(ChatColor.WHITE + "- Create ticket in discord for the rank");
+            lore.add(ChatColor.WHITE + "- It lasts 90 days and gives media perks");
 
             meta.setLore(lore);
 
