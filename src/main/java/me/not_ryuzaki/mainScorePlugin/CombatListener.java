@@ -24,17 +24,20 @@ public class CombatListener implements Listener {
         }
 
         // Indirect attack via projectile (e.g., arrow shot by player)
-        if (event.getDamager() instanceof org.bukkit.entity.Projectile) {
-            org.bukkit.entity.Projectile projectile = (org.bukkit.entity.Projectile) event.getDamager();
+        if (event.getDamager() instanceof org.bukkit.entity.Projectile projectile) {
             if (projectile.getShooter() instanceof Player) {
                 attacker = (Player) projectile.getShooter();
             }
         }
 
+        // 🛑 Prevent self-inflicted damage from triggering combat
+        if (attacker != null && attacker.equals(defender)) return;
+
         if (attacker != null && shouldStartCombat(attacker, defender)) {
             Combat.startCombat(attacker, defender);
         }
     }
+
 
 
     private boolean shouldStartCombat(Player p1, Player p2) {
