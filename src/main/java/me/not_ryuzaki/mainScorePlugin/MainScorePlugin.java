@@ -33,6 +33,8 @@ public final class MainScorePlugin extends JavaPlugin implements Listener {
     private final HashSet<UUID> hiddenPlayers = new HashSet<>();
     private Map<UUID, Boolean> scoreboardEnabled = new HashMap<>();
     private LuckPerms luckPerms;
+    private final Map<UUID, Boolean> tpaEnabled = new HashMap<>();
+
 
     public void setScoreboardEnabled(UUID uuid, boolean enabled) {
         scoreboardEnabled.put(uuid, enabled);
@@ -84,6 +86,15 @@ public final class MainScorePlugin extends JavaPlugin implements Listener {
             return;
         }
 
+        // Load from config
+        if (getConfig().isConfigurationSection("tpa-enabled")) {
+            ConfigurationSection section = getConfig().getConfigurationSection("tpa-enabled");
+            for (String key : section.getKeys(false)) {
+                UUID uuid = UUID.fromString(key);
+                tpaEnabled.put(uuid, section.getBoolean(key));
+            }
+        }
+
         kills = new HashMap<>();
         deaths = new HashMap<>();
         shards = new HashMap<>();
@@ -91,6 +102,19 @@ public final class MainScorePlugin extends JavaPlugin implements Listener {
         payDisabled = new HashSet<>();
         dailyKills = new HashMap<>();
         scoreboardEnabled = new HashMap<>();
+
+        TeleportCommandHandler handler = new TeleportCommandHandler(this);
+        getCommand("tpa").setExecutor(handler);
+        getCommand("tpa").setTabCompleter(handler);
+        getCommand("tpahere").setExecutor(handler);
+        getCommand("tpahere").setTabCompleter(handler);
+        getCommand("tpaccept").setExecutor(handler);
+        getCommand("tpdeny").setExecutor(handler);
+        getCommand("tpcancel").setExecutor(handler);
+
+        getCommand("spawn").setExecutor(new SpawnCommand(this, handler.getActiveCountdowns()));
+        getServer().getPluginManager().registerEvents(new JoinListenerTeleport(), this);
+        getServer().getPluginManager().registerEvents(new RespawnListenerTeleport(), this);
 
         this.luckPerms = getServer().getServicesManager().load(LuckPerms.class);
         getServer().getPluginManager().registerEvents(new PlayerJoinListener(this), this);
@@ -112,6 +136,10 @@ public final class MainScorePlugin extends JavaPlugin implements Listener {
         getCommand("shards").setExecutor(new ShardAdminCommand(this));
         getCommand("settings").setExecutor(new SettingsCommand(this));
         getCommand("discord").setExecutor(new DiscordCommand());
+
+        ShopCommand shopCommand = new ShopCommand(this);
+        getCommand("shop").setExecutor(shopCommand);
+        getServer().getPluginManager().registerEvents(shopCommand, this);
 
         getServer().getPluginManager().registerEvents(new JoinListener(this), this);
 
@@ -461,5 +489,13 @@ public final class MainScorePlugin extends JavaPlugin implements Listener {
 
     public LuckPerms getLuckPerms() {
         return luckPerms;
+    }
+
+    public boolean isTpaEnabled(UUID uuid) {
+        return tpaEnabled.getOrDefault(uuid, true);
+    }
+
+    public void setTpaEnabled(UUID uuid, boolean enabled) {
+        tpaEnabled.put(uuid, enabled);
     }
 }

@@ -41,3 +41,16 @@ commands:
     description: Toggle scrambled name tag
     usage: /hide
     permission: mainscoreplugin.hide
+
+  teams:
+    description: Opens the team GUI
+
+  shop:
+    description: Opens the main shop
+  tpa:
+  tpahere:
+  tpaccept:
+  tpdeny:
+  tpcancel:
+  spawn:
+    description: Teleports you to the world spawn

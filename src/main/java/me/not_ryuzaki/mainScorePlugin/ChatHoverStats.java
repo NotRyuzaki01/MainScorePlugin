@@ -70,11 +70,23 @@ public class ChatHoverStats implements Listener {
                     rawPrefix = "📹";
                     prefixColor = "#FF00AA";
                     break;
+                case "media_muted":
+                    rawPrefix = "📹";
+                    prefixColor = "#FF00AA";
+                    break;
                 case "plus":
                     rawPrefix = "+";
                     prefixColor = "#0094FF";
                     break;
+                case "plus_muted":
+                    rawPrefix = "+";
+                    prefixColor = "#0094FF";
+                    break;
                 case "default":
+                    rawPrefix = "";
+                    prefixColor = "#AAAAAA";
+                    break;
+                case "default_muted":
                     rawPrefix = "";
                     prefixColor = "#AAAAAA";
                     break;

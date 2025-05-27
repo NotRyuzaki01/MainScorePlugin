@@ -74,8 +74,8 @@ public class HideCommand implements CommandExecutor {
         TabPlayer tabPlayer = tabAPI.getPlayer(player.getUniqueId());
 
         if (tabPlayer != null && nameTagManager != null) {
-            nameTagManager.setPrefix(tabPlayer, "§k");
-            nameTagManager.hideNameTag(tabPlayer);
+            nameTagManager.setPrefix(tabPlayer, "§k"); // scrambled name
+            nameTagManager.showNameTag(tabPlayer); // keep it visible so it's scrambled, not hidden
         }
     }
 

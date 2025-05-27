@@ -33,29 +33,32 @@ public class SettingsCommand implements CommandExecutor, Listener {
         boolean scoreboard = plugin.getBoard(player.getUniqueId()) != null;
 
         Inventory gui = Bukkit.createInventory(null, 27, "Settings");
+
+        // Scoreboard toggle
         ItemStack lectern = new ItemStack(Material.LECTERN);
         ItemMeta lecternMeta = lectern.getItemMeta();
+        lecternMeta.setDisplayName("§x§3§7§e§b§9§aScoreboard");
+        lecternMeta.setLore(Collections.singletonList("§fCurrently: " + (scoreboard ? ChatColor.GREEN + "ON" : ChatColor.RED + "OFF")));
+        lectern.setItemMeta(lecternMeta);
+        gui.setItem(11, lectern);
 
-        lecternMeta.setDisplayName(ChatColor.GREEN + "SCOREBOARD");
-
+        // Payments toggle
         ItemStack emerald = new ItemStack(Material.EMERALD);
         ItemMeta emeraldMeta = emerald.getItemMeta();
-        emeraldMeta.setDisplayName(ChatColor.GREEN + "PAYMENTS");
-
+        emeraldMeta.setDisplayName("§x§3§7§e§b§9§aPayments");
         boolean payEnabled = plugin.isPayEnabled(player.getUniqueId());
         emeraldMeta.setLore(Collections.singletonList("§fCurrently: " + (payEnabled ? ChatColor.GREEN + "ON" : ChatColor.RED + "OFF")));
         emerald.setItemMeta(emeraldMeta);
+        gui.setItem(13, emerald);
 
-        gui.setItem(14, emerald); // Slot 11 for emerald
-
-
-        if (scoreboard)
-            lecternMeta.setLore(Collections.singletonList("§fCurrently: " + ChatColor.GREEN + "ON"));
-        else
-            lecternMeta.setLore(Collections.singletonList("§fCurrently: " + ChatColor.RED + "OFF"));
-
-        lectern.setItemMeta(lecternMeta);
-        gui.setItem(12, lectern);
+        // TPA toggle
+        ItemStack enderPearl = new ItemStack(Material.ENDER_PEARL);
+        ItemMeta pearlMeta = enderPearl.getItemMeta();
+        pearlMeta.setDisplayName("§x§3§7§e§b§9§aTPA Requests");
+        boolean tpaEnabled = plugin.isTpaEnabled(player.getUniqueId());
+        pearlMeta.setLore(Collections.singletonList("§fCurrently: " + (tpaEnabled ? ChatColor.GREEN + "ON" : ChatColor.RED + "OFF")));
+        enderPearl.setItemMeta(pearlMeta);
+        gui.setItem(15, enderPearl);
 
         player.openInventory(gui);
         return true;
@@ -71,41 +74,48 @@ public class SettingsCommand implements CommandExecutor, Listener {
 
         if (clicked == null || !clicked.hasItemMeta()) return;
 
+        UUID uuid = player.getUniqueId();
+
         if (clicked.getType() == Material.LECTERN) {
             player.playSound(player.getLocation(), Sound.UI_BUTTON_CLICK, 1f, 1f);
-            UUID uuid = player.getUniqueId();
             boolean current = plugin.getBoard(uuid) != null;
             boolean newState = !current;
-
-            // Update plugin scoreboard toggle
             plugin.setScoreboardEnabled(uuid, newState);
             plugin.getConfig().set("scoreboard-enabled." + uuid, newState);
             plugin.saveConfig();
 
-            // Update item
             ItemMeta meta = clicked.getItemMeta();
             meta.setLore(Collections.singletonList("§fCurrently: " + (newState ? ChatColor.GREEN + "ON" : ChatColor.RED + "OFF")));
             clicked.setItemMeta(meta);
-
-            // Update inventory view
-            player.getOpenInventory().setItem(12, clicked);
+            player.getOpenInventory().setItem(11, clicked);
         }
+
         if (clicked.getType() == Material.EMERALD) {
             player.playSound(player.getLocation(), Sound.UI_BUTTON_CLICK, 1f, 1f);
-            UUID uuid = player.getUniqueId();
             boolean current = plugin.isPayEnabled(uuid);
             boolean newState = !current;
-
             plugin.setPayEnabled(uuid, newState);
             plugin.getConfig().set("pay-enabled." + uuid, newState);
             plugin.saveConfig();
 
-            // Update emerald button
             ItemMeta meta = clicked.getItemMeta();
             meta.setLore(Collections.singletonList("§fCurrently: " + (newState ? ChatColor.GREEN + "ON" : ChatColor.RED + "OFF")));
             clicked.setItemMeta(meta);
-            player.getOpenInventory().setItem(14, clicked);
+            player.getOpenInventory().setItem(13, clicked);
         }
 
+        if (clicked.getType() == Material.ENDER_PEARL) {
+            player.playSound(player.getLocation(), Sound.UI_BUTTON_CLICK, 1f, 1f);
+            boolean current = plugin.isTpaEnabled(uuid);
+            boolean newState = !current;
+            plugin.setTpaEnabled(uuid, newState);
+            plugin.getConfig().set("tpa-enabled." + uuid, newState);
+            plugin.saveConfig();
+
+            ItemMeta meta = clicked.getItemMeta();
+            meta.setLore(Collections.singletonList("§fCurrently: " + (newState ? ChatColor.GREEN + "ON" : ChatColor.RED + "OFF")));
+            clicked.setItemMeta(meta);
+            player.getOpenInventory().setItem(15, clicked);
+        }
     }
 }
